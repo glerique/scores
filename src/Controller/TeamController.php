@@ -14,10 +14,12 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class TeamController extends AbstractController
 {
     #[Route('/api/team', name:"createTeam", methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits pour créer une équipe')]
     public function createTeam(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator): JsonResponse
     {
         $team = $serializer->deserialize($request->getContent(), Team::class, 'json');
@@ -39,7 +41,7 @@ class TeamController extends AbstractController
     }
 
    #[Route('/api/team/{id}', name:"updateTeam", methods:['PUT'])]
-
+   #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits pour modifier une équipe')]
     public function updateTeam(Request $request, SerializerInterface $serializer, Team $team, EntityManagerInterface $em): JsonResponse
     {
         $updatedTeam = $serializer->deserialize($request->getContent(), Team::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $team]);
@@ -52,6 +54,7 @@ class TeamController extends AbstractController
    }
 
    #[Route('/api/team/{id}', name: 'deleteTeam', methods: ['DELETE'])]
+   #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits pour supprimer une équipe')]
     public function deleteTeam(Team $team, EntityManagerInterface $em): JsonResponse
     {
         $em->remove($team);

@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class PlayerController extends AbstractController
 {
     #[Route('/api/player', name:"createPlayer", methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits pour créer un joueur')]
     public function createPlayer(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator,
     TeamRepository $teamRepository): JsonResponse
     {
@@ -35,6 +37,7 @@ class PlayerController extends AbstractController
    }
 
    #[Route('/api/player/{id}', name:"updatePlayer", methods:['PUT'])]
+   #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits pour modifier un joueur')]
     public function updatePlayer(Request $request, SerializerInterface $serializer, Player $player, EntityManagerInterface $em, TeamRepository $teamRepository): JsonResponse
     {
         $updatedPlayer = $serializer->deserialize($request->getContent(), Player::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $player]);
@@ -56,6 +59,7 @@ class PlayerController extends AbstractController
     }
 
     #[Route('/api/player/{id}', name: 'deletePlayer', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits pour supprimer un joueur')]
     public function deletePlayer(Player $player, EntityManagerInterface $em): JsonResponse
     {
         $em->remove($player);

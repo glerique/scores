@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\PlayerRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PlayerRepository::class)]
 class Player
@@ -11,19 +12,23 @@ class Player
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["getPlayers", "getTeams"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(["getPlayers", "getTeams"])]
     #[Assert\NotBlank(message: "Le prénom est obligatoire.")]
     #[Assert\Length(min: 3, max: 50)]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(["getPlayers", "getTeams"])]
     #[Assert\NotBlank(message: "Le nom est obligatoire.")]
     #[Assert\Length(min: 3, max: 50)]
     private ?string $lastName = null;
 
     #[ORM\Column(type: 'integer', nullable: false, options: ['default' => 0])]
+    #[Groups(["getPlayers", "getTeams"])]
     #[Assert\NotNull(message: "Le nombre de buts est obligatoire.")]
     #[Assert\Range(min: 0,max: 100,
     minMessage: "Le nombre de buts ne peut pas être inférieur à {{ limit }}.",
@@ -32,8 +37,11 @@ class Player
 
     #[ORM\ManyToOne(inversedBy: 'players')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["getPlayers"])]
     #[Assert\NotNull()]
     private ?Team $team = null;
+
+
 
     public function getId(): ?int
     {
@@ -95,3 +103,4 @@ class Player
         return $this;
     }
 }
+

@@ -6,6 +6,7 @@ use App\Repository\TeamRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
 class Team
@@ -13,16 +14,21 @@ class Team
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["getPlayers","getTeams"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(["getPlayers", "getTeams"])]
     #[Assert\NotBlank(message: "Le nom est obligatoire.")]
-    #[Assert\Length(min: 3, max: 50,
-    minMessage: "Le score ne peut pas être inférieur à {{ limit }}.",
-    maxMessage: "Le score ne peut pas être supérieur à {{ limit }}.")]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: "Le score ne peut pas être inférieur à {{ limit }}.",
+        maxMessage: "Le score ne peut pas être supérieur à {{ limit }}.")]
     private ?string $name = null;
 
     #[ORM\Column(type: 'integer', nullable: false, options: ['default' => 0])]
+    #[Groups(["getPlayers", "getTeams"])]
     #[Assert\NotNull(message: "Le score ne peut pas être vide.")]
     #[Assert\Range(min: 0,max: 100)]
     private ?int $score = null;
@@ -31,10 +37,10 @@ class Team
      * @var Collection<int, Player>
      */
     #[ORM\OneToMany(targetEntity: Player::class, mappedBy: 'team', orphanRemoval: true)]
+    #[Groups(["getTeams"])]
     #[Assert\NotNull()]
     #[Assert\Valid]
     #[Assert\Count(min: 1, minMessage: "Une équipe doit avoir au moins un joueur.")]
-    private ?Team $team = null;
     private Collection $players;
 
     public function __construct()
@@ -108,3 +114,4 @@ class Team
         return $this;
     }
 }
+

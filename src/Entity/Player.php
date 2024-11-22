@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\PlayerRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PlayerRepository::class)]
 class Player
@@ -30,9 +31,6 @@ class Player
     #[ORM\Column(type: 'integer', nullable: false, options: ['default' => 0])]
     #[Groups(["getPlayers", "getTeams"])]
     #[Assert\NotNull(message: "Le nombre de buts est obligatoire.")]
-    #[Assert\Range(min: 0,max: 100,
-    minMessage: "Le nombre de buts ne peut pas être inférieur à {{ limit }}.",
-    maxMessage: "Le nombre debuts ne peut pas être supérieur à {{ limit }}.")]
     private ?int $goalCount = null;
 
     #[ORM\ManyToOne(inversedBy: 'players')]
@@ -40,8 +38,6 @@ class Player
     #[Groups(["getPlayers"])]
     #[Assert\NotNull()]
     private ?Team $team = null;
-
-
 
     public function getId(): ?int
     {

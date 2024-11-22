@@ -23,7 +23,7 @@ Install the Application
 
 Generate SSH Keys
 
-    Use the following command to generate SSH keys for JWT:jwt :generate-keypair
+    Use the following command to generate SSH keys for JWT: php bin/console lexik:jwt:generate-keypair
 
 <hr />
 
@@ -49,12 +49,12 @@ You can use the following credentials to authenticate:
 	    
     {
   	"username": "user@scores-api.com",
- 	"password": "password"
+ 	"password": "secret"
 	}
 
     {
   	"username": "user@scores-api.com",
- 	"password": "password"
+ 	"password": "secret"
 	}
 
 

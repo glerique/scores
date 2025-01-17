@@ -23,11 +23,6 @@ class Team
     #[Assert\NotBlank(message: "Le nom est obligatoire.")]
     private ?string $name = null;
 
-    #[ORM\Column(type: 'integer', nullable: false, options: ['default' => 0])]
-    #[Groups(["getPlayers", "getTeams"])]
-    #[Assert\NotNull(message: "Le score ne peut pas être vide.")]
-    private ?int $score = null;
-
     /**
      * @var Collection<int, Player>
      */
@@ -41,6 +36,10 @@ class Team
      */
     #[ORM\OneToMany(targetEntity: Game::class, mappedBy: 'homeTeam')]
     private Collection $games;
+
+    #[ORM\Column(options: ['default' => 0])]
+    #[Groups(["getTeams"])]
+    private ?int $points = null;
 
     public function __construct()
     {
@@ -68,18 +67,6 @@ class Team
     public function setId(int $id): static
     {
         $this->id = $id;
-
-        return $this;
-    }
-
-    public function getScore(): ?int
-    {
-        return $this->score;
-    }
-
-    public function setScore(int $score): static
-    {
-        $this->score = $score;
 
         return $this;
     }
@@ -140,6 +127,18 @@ class Team
                 $game->setHomeTeam(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPoints(): ?int
+    {
+        return $this->points;
+    }
+
+    public function setPoints(int $points): static
+    {
+        $this->points = $points;
 
         return $this;
     }

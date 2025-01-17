@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\GameRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
@@ -27,6 +29,17 @@ class Game
 
     #[ORM\Column]
     private ?int $awayScore = null;
+
+    /**
+     * @var Collection<int, PlayerStats>
+     */
+    #[ORM\OneToMany(targetEntity: PlayerStats::class, mappedBy: 'game')]
+    private Collection $playerStats;
+
+    public function __construct()
+    {
+        $this->playerStats = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -89,6 +102,36 @@ class Game
     public function setAwayScore(int $awayScore): static
     {
         $this->awayScore = $awayScore;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlayerStats>
+     */
+    public function getPlayerStats(): Collection
+    {
+        return $this->playerStats;
+    }
+
+    public function addPlayerStat(PlayerStats $playerStat): static
+    {
+        if (!$this->playerStats->contains($playerStat)) {
+            $this->playerStats->add($playerStat);
+            $playerStat->setGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlayerStat(PlayerStats $playerStat): static
+    {
+        if ($this->playerStats->removeElement($playerStat)) {
+            // set the owning side to null (unless already changed)
+            if ($playerStat->getGame() === $this) {
+                $playerStat->setGame(null);
+            }
+        }
 
         return $this;
     }

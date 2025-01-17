@@ -2,8 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\PlayerRepository;
+use App\Entity\PlayerStats;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\PlayerRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -28,16 +31,22 @@ class Player
     #[Assert\Length(min: 3, max: 50)]
     private ?string $lastName = null;
 
-    #[ORM\Column(type: 'integer', nullable: false, options: ['default' => 0])]
-    #[Groups(["getPlayers", "getTeams"])]
-    #[Assert\NotNull(message: "Le nombre de buts est obligatoire.")]
-    private ?int $goalCount = null;
-
     #[ORM\ManyToOne(inversedBy: 'players')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(["getPlayers"])]
     #[Assert\NotNull()]
     private ?Team $team = null;
+
+    /**
+     * @var Collection<int, PlayerStats>
+     */
+    #[ORM\OneToMany(targetEntity: PlayerStats::class, mappedBy: 'player')]
+    private Collection $playerStats;
+
+    public function __construct()
+    {
+        $this->playerStats = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -75,18 +84,6 @@ class Player
         return $this;
     }
 
-    public function getGoalCount(): ?int
-    {
-        return $this->goalCount;
-    }
-
-    public function setGoalCount(?int $goalCount): static
-    {
-        $this->goalCount = $goalCount;
-
-        return $this;
-    }
-
     public function getTeam(): ?Team
     {
         return $this->team;
@@ -98,5 +95,48 @@ class Player
 
         return $this;
     }
-}
 
+    /**
+     * @return Collection<int, PlayerStats>
+     */
+    public function getPlayerStats(): Collection
+    {
+        return $this->playerStats;
+    }
+
+    public function addPlayerStat(PlayerStats $playerStat): static
+    {
+        if (!$this->playerStats->contains($playerStat)) {
+            $this->playerStats->add($playerStat);
+            $playerStat->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlayerStat(PlayerStats $playerStat): static
+    {
+        if ($this->playerStats->removeElement($playerStat)) {
+            // set the owning side to null (unless already changed)
+            if ($playerStat->getPlayer() === $this) {
+                $playerStat->setPlayer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getTotalGoals(): int
+    {
+        return $this->playerStats->reduce(function (int $total, PlayerStats $stats) {
+            return $total + $stats->getGoalCount();
+        }, 0);
+    }
+
+    public function getTotalAssists(): int
+    {
+        return $this->playerStats->reduce(function (int $total, PlayerStats $stats) {
+            return $total + $stats->getAssistCount();
+        }, 0);
+    }
+}

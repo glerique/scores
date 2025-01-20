@@ -39,7 +39,7 @@ class Team
 
     #[ORM\Column(options: ['default' => 0])]
     #[Groups(["getTeams"])]
-    private ?int $points = null;
+    private int $points = 0;
 
     public function __construct()
     {

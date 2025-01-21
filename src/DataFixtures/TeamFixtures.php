@@ -20,7 +20,6 @@ class TeamFixtures extends AbstractBasicFixtures
         for ($i = 0; $i < self::TEAMS_COUNT; $i++) {
             $team = new Team();
             $team->setName($this->faker->city);
-            $team->setPoints($this->faker->numberBetween(0, 100));
             $manager->persist($team);
 
             $this->addReference('team_' . $i, $team);

@@ -2,10 +2,10 @@
 
 namespace App\DataFixtures;
 
-use Faker\Factory;
+
 use App\Entity\Game;
-use Faker\Generator;
 use DateTimeImmutable;
+use App\Service\TeamService;
 use App\DataFixtures\TeamFixtures;
 use Doctrine\Persistence\ObjectManager;
 use App\DataFixtures\AbstractBasicFixtures;
@@ -15,8 +15,9 @@ class GameFixtures extends AbstractBasicFixtures implements DependentFixtureInte
 {
     private const GAMES_COUNT = 100;
 
-    public function __construct()
-    {
+    public function __construct(
+        private TeamService $teamService
+    ){
         parent::__construct();
     }
 
@@ -36,7 +37,11 @@ class GameFixtures extends AbstractBasicFixtures implements DependentFixtureInte
             $this->addReference('game_' . $i, $game);
         }
 
+
+
         $manager->flush();
+
+
     }
 
     public function getDependencies(): array

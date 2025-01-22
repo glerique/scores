@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Player;
+use App\Service\PlayerService;
 use App\Repository\TeamRepository;
 use App\Repository\PlayerRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,61 +20,53 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class PlayerController extends AbstractController
 {
+
+    public function __construct(
+        private readonly SerializerInterface $serializer,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly PlayerService $playerService,
+    ) {}
+
     #[Route('/api/player', name:"createPlayer", methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits pour créer un joueur')]
-    public function createPlayer(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator,
-    TeamRepository $teamRepository): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        $player = $serializer->deserialize($request->getContent(), Player::class, 'json');
-        $content = $request->toArray();
-        $id = $content['team'] ?? -1;
-        $player->setTeam($teamRepository->find($id));
+        $player = $this->playerService->createPlayer($request);
 
-        $em->persist($player);
-        $em->flush();
+        $jsonPlayer = $this->serializer->serialize($player, 'json', ['groups' => 'getPlayers']);
+        $location = $this->urlGenerator->generate('detailPlayer', ['id' => $player->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $jsonPlayer = $serializer->serialize($player, 'json', ['groups' => 'getPlayers']);
-        $location = $urlGenerator->generate('detailPlayer', ['id' => $player->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
         return new JsonResponse($jsonPlayer, Response::HTTP_CREATED, ["Location" => $location], true);
    }
 
    #[Route('/api/player/{id}', name:"updatePlayer", methods:['PUT'])]
    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits pour modifier un joueur')]
-    public function updatePlayer(Request $request, SerializerInterface $serializer, Player $player, EntityManagerInterface $em, TeamRepository $teamRepository): JsonResponse
+    public function update(Request $request, #[MapEntity] Player $player): JsonResponse
     {
-        $updatedPlayer = $serializer->deserialize($request->getContent(), Player::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $player]);
-        $content = $request->toArray();
-
-        $id = $content['team'] ?? -1;
-        $updatedPlayer->setTeam($teamRepository->find($id));
-
-        $em->persist($updatedPlayer);
-        $em->flush();
+        $this->playerService->updatePlayer($request, $player);
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
    }
 
     #[Route('/api/player/{id}', name: 'detailPlayer', methods: ['GET'])]
-    public function getDetailPlayer(#[MapEntity] Player $player, SerializerInterface $serializer, PlayerRepository $playerRepository): JsonResponse
+    public function getDetail(#[MapEntity] Player $player): JsonResponse
     {
-        $jsonBook = $serializer->serialize($player, 'json', ['groups' => 'getPlayers']);
+        $jsonBook = $this->serializer->serialize($player, 'json', ['groups' => 'getPlayers']);
         return new JsonResponse($jsonBook, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
     #[Route('/api/player/{id}', name: 'deletePlayer', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits pour supprimer un joueur')]
-    public function deletePlayer(Player $player, EntityManagerInterface $em): JsonResponse
+    public function delete(Player $player, EntityManagerInterface $em): JsonResponse
     {
-        $em->remove($player);
-        $em->flush();
-
+        $this->playerService->deletePlayer($player);
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
     #[Route('/api/players', name: 'player', methods: ['GET'])]
-    public function getPlayerList(PlayerRepository $playerRepository, SerializerInterface $serializer): JsonResponse
+    public function getList(): JsonResponse
     {
-        $playerList = $playerRepository->findAll();
-        $jsonPlayerList = $serializer->serialize($playerList, 'json', ['groups' => 'getPlayers']);
+        $playerList =  $this->playerService->getAllPlayers();
+        $jsonPlayerList = $this->serializer->serialize($playerList, 'json', ['groups' => 'getPlayers']);
         return new JsonResponse($jsonPlayerList, Response::HTTP_OK, [], true);
     }
 }

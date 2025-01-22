@@ -2,9 +2,9 @@
 nelmio_api_doc:
     documentation:
         info:
-            title: Books
-            description: Une API d'OpenClassrooms avec des livres, des autrices et des auteurs !
-            version: 2.0.0
+            title: Scores
+            description: Une API de gestion de scores !
+            version: 1.0.0
         paths:
             /api/login_check:
                 post:

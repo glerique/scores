@@ -50,13 +50,13 @@ class PlayerController extends AbstractController
     #[Route('/api/player/{id}', name: 'detailPlayer', methods: ['GET'])]
     public function getDetail(#[MapEntity] Player $player): JsonResponse
     {
-        $jsonBook = $this->serializer->serialize($player, 'json', ['groups' => 'getPlayers']);
-        return new JsonResponse($jsonBook, Response::HTTP_OK, ['accept' => 'json'], true);
+        $jsonPlayer = $this->serializer->serialize($player, 'json', ['groups' => 'getPlayers']);
+        return new JsonResponse($jsonPlayer, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
     #[Route('/api/player/{id}', name: 'deletePlayer', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits pour supprimer un joueur')]
-    public function delete(Player $player, EntityManagerInterface $em): JsonResponse
+    public function delete(Player $player): JsonResponse
     {
         $this->playerService->deletePlayer($player);
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);

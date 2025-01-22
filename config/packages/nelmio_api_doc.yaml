@@ -2,9 +2,9 @@
 nelmio_api_doc:
     documentation:
         info:
-            title: Scoress
-            description: Une API de gestions de scores, d'équipes et leurs joueurs !
-            version: 2.0.0
+            title: Scores
+            description: Une API de gestions de scores !
+            version: 1.0.0
         paths:
             /api/login_check:
                 post:
